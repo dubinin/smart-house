@@ -30,8 +30,21 @@ impl TemperatureScale {
     }
 }
 
+/// Символы для отображения температурной шкалы.
+impl std::fmt::Display for TemperatureScale {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let description = match *self {
+            Self::Celsius => "°C",
+            Self::Fahrenheit => "°F",
+            Self::Kelvin => "K",
+        };
+        write!(f, "{}", description)
+    }
+}
+
 /// Реализация функционала устройства для умного термометра.
-impl <'a>Device for SmartThermometer<'a> {
+impl<'a> Device for SmartThermometer<'a> {
+    /// Получить имя термометра.
     fn name(&self) -> &str {
         self.name
     }
@@ -43,14 +56,26 @@ impl <'a>Device for SmartThermometer<'a> {
 
     /// Функция получения отчета устройства.
     fn report(&self) -> String {
-        todo!("Реализовать метод")
+        let scale = TemperatureScale::Celsius;
+        format!(
+            "Умный термометр: {}, температура: {} {}, потребляемая мощность: {}",
+            self.name(),
+            self.temperature(&scale),
+            scale,
+            self.power()
+        )
     }
 }
 
 /// Реализация функций специфичных для умного термометра.
 impl<'a> SmartThermometer<'a> {
+    /// Конструктор термометра с передачей ее названия.
+    pub fn with_name(name: &'a str) -> Self {
+        Self { name }
+    }
+
     /// Функция получения значения температуры в зависимости от переданной температурной шкалы.
-    pub fn temperature(&self, scale: TemperatureScale) -> f32 {
+    pub fn temperature(&self, scale: &TemperatureScale) -> f32 {
         let mut rng = rand::thread_rng();
         let raw_temperature = rng.gen_range(-20.0..=40.0);
         scale.transform(raw_temperature)

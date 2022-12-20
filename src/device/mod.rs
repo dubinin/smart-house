@@ -20,3 +20,10 @@ pub trait Device {
     /// Функция создает отчет по устройству.
     fn report(&self) -> String;
 }
+
+/// Реализация Display трейта для любых устройств.
+impl std::fmt::Display for dyn Device {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.report())
+    }
+}
