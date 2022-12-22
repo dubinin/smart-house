@@ -27,3 +27,6 @@ impl std::fmt::Display for dyn Device {
         write!(f, "{}", self.report())
     }
 }
+
+#[cfg(test)]
+mod test;
