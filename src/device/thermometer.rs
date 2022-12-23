@@ -1,6 +1,6 @@
 //! Модуль для реализация умного термометра.
 
-use super::Device;
+use super::{Device, DisplayableDevice};
 use rand::Rng;
 
 /// Структура умного термометра.
@@ -69,6 +69,8 @@ impl<'a> std::fmt::Display for SmartThermometer<'a> {
         )
     }
 }
+
+impl<'a> DisplayableDevice for SmartThermometer<'a> {}
 
 /// Реализация функций специфичных для умного термометра.
 impl<'a> SmartThermometer<'a> {

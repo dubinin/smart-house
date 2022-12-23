@@ -1,7 +1,7 @@
 //! Модуль содержащий реализацию сущности умного дома.
 
 use crate::{
-    device::Device,
+    device::DisplayableDevice,
     error::{attachment_error, AttachmentError},
 };
 
@@ -70,7 +70,7 @@ impl<'a> SmartHouse<'a> {
 /// Структура реализующая комнату в умном доме, содержит название и список устройств.
 pub struct Room<'a> {
     name: &'a str,
-    devices: HashMap<&'a str, &'a dyn Device>,
+    devices: HashMap<&'a str, &'a dyn DisplayableDevice>,
 }
 
 /// Реализация функций комнаты умного дома.
@@ -89,7 +89,10 @@ impl<'a> Room<'a> {
     }
 
     /// Функция добавление устройства в комнату.
-    pub fn attach_device(&mut self, device: &'a dyn Device) -> Result<(), AttachmentError> {
+    pub fn attach_device(
+        &mut self,
+        device: &'a dyn DisplayableDevice,
+    ) -> Result<(), AttachmentError> {
         let is_exist = |name: &str| -> bool { self.devices.contains_key(name) };
         let device_name = device.name();
 

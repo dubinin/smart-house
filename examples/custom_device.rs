@@ -1,6 +1,6 @@
 //! Пример использование библиотеки умного дома с пользовательскими устройствами.
 
-use smart_house::device::Device;
+use smart_house::device::{Device, DisplayableDevice};
 use smart_house::house::{Room, SmartHouse};
 
 struct MyDevice {}
@@ -20,6 +20,8 @@ impl std::fmt::Display for MyDevice {
         write!(f, "Я простое устройство по имени: {}", self.name())
     }
 }
+
+impl DisplayableDevice for MyDevice {}
 
 fn main() {
     // Создаем умный дом с название по умолчанию.

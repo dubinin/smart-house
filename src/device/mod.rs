@@ -10,13 +10,15 @@ pub use socket::SmartSocket;
 pub use thermometer::SmartThermometer;
 
 /// Общее поведение для любых устройство умного дома.
-pub trait Device: std::fmt::Display {
+pub trait Device {
     /// Функция получения имени устройства.
     fn name(&self) -> &str;
 
     /// Возвращает потребляемое количество энергии устройством.
     fn power(&self) -> u16;
 }
+
+pub trait DisplayableDevice: Device + std::fmt::Display {}
 
 #[cfg(test)]
 mod test;

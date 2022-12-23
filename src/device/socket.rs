@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use crate::error::{attachment_error, AttachmentError};
 
-use super::Device;
+use super::{Device, DisplayableDevice};
 
 /// Структура умной розетки, которая хранит ссылки на устройства подключенные к ней.
 pub struct SmartSocket<'a> {
@@ -59,6 +59,8 @@ impl<'a> std::fmt::Display for SmartSocket<'a> {
         )
     }
 }
+
+impl<'a> DisplayableDevice for SmartSocket<'a> {}
 
 /// Функциональность специфичная для умной розетки.
 impl<'a> SmartSocket<'a> {
