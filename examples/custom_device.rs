@@ -13,9 +13,11 @@ impl Device for MyDevice {
     fn power(&self) -> u16 {
         16
     }
+}
 
-    fn report(&self) -> String {
-        format!("Я простое устройство по имени: {}", self.name())
+impl std::fmt::Display for MyDevice {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Я простое устройство по имени: {}", self.name())
     }
 }
 

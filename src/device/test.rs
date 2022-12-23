@@ -12,7 +12,7 @@ fn test_device_fields() {
 
     assert_eq!(device.name(), "Розетка");
     assert_eq!(device.power(), 0u16);
-    assert!(!device.report().is_empty());
+    assert!(!device.to_string().is_empty());
 }
 
 /// Проверим что к розетки нельзя добавить устройство которое не потребляет электроэнергию.

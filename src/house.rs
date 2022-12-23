@@ -1,8 +1,10 @@
 //! Модуль содержащий реализацию сущности умного дома.
 
-use crate::error::{attachment_error, AttachmentError};
+use crate::{
+    device::Device,
+    error::{attachment_error, AttachmentError},
+};
 
-use super::device::Device;
 use std::collections::HashMap;
 
 /// Структура умного дома, содержит название и имеет список комнат.
@@ -57,7 +59,7 @@ impl<'a> SmartHouse<'a> {
                 // Display для Device, соответственно device.to_string() тоже не работает.
                 // Не могу понять в чем принципиальное отличие от рабочего варианта.
                 // result.push_str(&format!("\t{}\n", device));
-                result.push_str(&format!("\t{}\n", device.report()));
+                result.push_str(&format!("\t{}\n", device));
             }
         }
 

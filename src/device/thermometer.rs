@@ -53,11 +53,14 @@ impl<'a> Device for SmartThermometer<'a> {
     fn power(&self) -> u16 {
         20
     }
+}
 
-    /// Функция получения отчета устройства.
-    fn report(&self) -> String {
+/// Трейт Display используется для составления отчета для термометра.
+impl<'a> std::fmt::Display for SmartThermometer<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let scale = TemperatureScale::Celsius;
-        format!(
+        write!(
+            f,
             "Умный термометр: {}, температура: {} {}, потребляемая мощность: {}",
             self.name(),
             self.temperature(&scale),

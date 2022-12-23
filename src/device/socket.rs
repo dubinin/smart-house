@@ -45,10 +45,13 @@ impl<'a> Device for SmartSocket<'a> {
     fn power(&self) -> u16 {
         self.devices.iter().map(|device| device.1.power()).sum()
     }
+}
 
-    /// Функция получения отчета устройства.
-    fn report(&self) -> String {
-        format!(
+/// Трейт Display используется для составления отчета по розетки.
+impl<'a> std::fmt::Display for SmartSocket<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
             "Умная розетка: {}, подключено устройств: {}, потребляемая мощность: {}",
             self.name(),
             self.devices.len(),
