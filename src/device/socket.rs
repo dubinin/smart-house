@@ -1,6 +1,6 @@
 //! Модуль для реализация умной розетки.
 
-use std::collections::HashMap;
+use std::collections::{hash_map::Values, HashMap};
 
 use crate::error::{attachment_error, AttachmentError};
 
@@ -9,7 +9,11 @@ use super::{Device, DisplayableDevice};
 /// Структура умной розетки, которая хранит ссылки на устройства подключенные к ней.
 pub struct SmartSocket<'a> {
     name: &'a str,
-    devices: HashMap<&'a str, &'a dyn Device>,
+    devices: HashMap<String, &'a dyn Device>,
+}
+
+pub struct SmartSocketIterator<'a> {
+    iter: Values<'a, String, &'a dyn Device>,
 }
 
 /// Ошибки возникающие при использовании розетки.
@@ -43,7 +47,7 @@ impl<'a> Device for SmartSocket<'a> {
     /// Значение потребляемой мощности. Есть сумма потребляемых мощностей подключенных
     /// к розетки других устройств. У самой розетки потребляемая мощность равно 0.
     fn power(&self) -> u16 {
-        self.devices.iter().map(|device| device.1.power()).sum()
+        self.into_iter().map(|device| device.power()).sum()
     }
 }
 
@@ -84,10 +88,35 @@ impl<'a> SmartSocket<'a> {
 
         match attachment_error(device_name, is_exist) {
             Ok(_) => {
-                self.devices.insert(device_name, device);
+                self.devices.insert(device_name.to_string(), device);
                 Ok(self.power())
             }
             Err(e) => Err(SocketError::AttachmentError(e)),
+        }
+    }
+}
+
+/// Реализация итератора для разетки. Происходит обход по устройствам подключенным к розетке.
+impl<'a> Iterator for SmartSocketIterator<'a> {
+    type Item = &'a dyn Device;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let value = self.iter.next();
+        match value {
+            Some(v) => Some(*v),
+            None => None,
+        }
+    }
+}
+
+/// Преобразование розетки в итератор.
+impl<'a> IntoIterator for &'a SmartSocket<'a> {
+    type Item = &'a dyn Device;
+    type IntoIter = SmartSocketIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        SmartSocketIterator {
+            iter: self.devices.values(),
         }
     }
 }
