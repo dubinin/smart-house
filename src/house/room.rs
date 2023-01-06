@@ -8,7 +8,7 @@ use std::collections::HashMap;
 /// Структура реализующая комнату в умном доме, содержит название и список устройств.
 pub struct Room<'a> {
     name: &'a str,
-    pub devices: HashMap<&'a str, &'a dyn DisplayableDevice>,
+    pub devices: HashMap<String, &'a dyn DisplayableDevice>,
 }
 
 /// Реализация функций комнаты умного дома.
@@ -35,7 +35,7 @@ impl<'a> Room<'a> {
         let device_name = device.name();
 
         attachment_error(device_name, is_exist).map(|_| {
-            self.devices.insert(device_name, device);
+            self.devices.insert(device_name.to_string(), device);
         })
     }
 }

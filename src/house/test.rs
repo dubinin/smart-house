@@ -65,3 +65,16 @@ fn test_create_room_with_name() {
 
     assert_eq!(room.name(), "Комната");
 }
+
+/// Итератор по дому обходит комнаты.
+#[test]
+fn test_house_iterator_over_rooms() {
+    let mut house = SmartHouse::default();
+    let room = Room::with_name("Комната");
+    house.attach_room(room).unwrap();
+
+    let rooms: Vec<&str> = house.into_iter().map(|r| -> &str { r.name() }).collect();
+
+    assert_eq!(rooms.len(), 1);
+    assert_eq!(rooms[0], "Комната");
+}

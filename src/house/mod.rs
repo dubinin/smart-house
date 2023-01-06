@@ -5,12 +5,16 @@ mod room;
 use crate::error::{attachment_error, AttachmentError};
 pub use crate::house::room::Room;
 
-use std::collections::HashMap;
+use std::collections::{hash_map::Values, HashMap};
 
 /// Структура умного дома, содержит название и имеет список комнат.
 pub struct SmartHouse<'a> {
     name: &'a str,
     rooms: HashMap<String, Room<'a>>,
+}
+
+pub struct HouseIterator<'a> {
+    iter: Values<'a, String, Room<'a>>,
 }
 
 /// Конструктор по умолчанию для умного дома.
@@ -50,7 +54,7 @@ impl<'a> SmartHouse<'a> {
 
         result.push_str(&format!("Отчет для дома: {}\n", self.name));
 
-        for room in self.rooms.values() {
+        for room in self {
             result.push_str(&format!("{:-<20}\n", ""));
             result.push_str(&format!("Комната: {}\n", room.name()));
 
@@ -60,6 +64,27 @@ impl<'a> SmartHouse<'a> {
         }
 
         result
+    }
+}
+
+/// Реализация итератора для дома. Происходит обход по комнатам дома.
+impl<'a> Iterator for HouseIterator<'a> {
+    type Item = &'a Room<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next()
+    }
+}
+
+/// Преобразование дома в итератор.
+impl<'a> IntoIterator for &'a SmartHouse<'a> {
+    type Item = &'a Room<'a>;
+    type IntoIter = HouseIterator<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        HouseIterator {
+            iter: self.rooms.values(),
+        }
     }
 }
 
