@@ -1,9 +1,9 @@
 //! Модуль содержащий реализацию сущности умного дома.
 
-use crate::{
-    device::DisplayableDevice,
-    error::{attachment_error, AttachmentError},
-};
+mod room;
+
+use crate::error::{attachment_error, AttachmentError};
+pub use crate::house::room::Room;
 
 use std::collections::HashMap;
 
@@ -39,8 +39,8 @@ impl<'a> SmartHouse<'a> {
     pub fn attach_room(&mut self, room: Room<'a>) -> Result<(), AttachmentError> {
         let is_exist = |name: &str| -> bool { self.rooms.contains_key(name) };
 
-        attachment_error(room.name, is_exist).map(|_| {
-            self.rooms.insert(room.name(), room);
+        attachment_error(room.name(), is_exist).map(|_| {
+            self.rooms.insert(room.name().to_string(), room);
         })
     }
 
@@ -55,50 +55,11 @@ impl<'a> SmartHouse<'a> {
             result.push_str(&format!("Комната: {}\n", room.name()));
 
             for device in room.devices.values() {
-                // Почему не удается просто передавать device? Я сделал реализацию трейта
-                // Display для Device, соответственно device.to_string() тоже не работает.
-                // Не могу понять в чем принципиальное отличие от рабочего варианта.
-                // result.push_str(&format!("\t{}\n", device));
                 result.push_str(&format!("\t{}\n", device));
             }
         }
 
         result
-    }
-}
-
-/// Структура реализующая комнату в умном доме, содержит название и список устройств.
-pub struct Room<'a> {
-    name: &'a str,
-    devices: HashMap<&'a str, &'a dyn DisplayableDevice>,
-}
-
-/// Реализация функций комнаты умного дома.
-impl<'a> Room<'a> {
-    /// Конструктуро комнаты с переданным названием.
-    pub fn with_name(name: &'a str) -> Self {
-        Self {
-            name,
-            devices: Default::default(),
-        }
-    }
-
-    /// Получить название комнаты.
-    pub fn name(&self) -> String {
-        self.name.to_string()
-    }
-
-    /// Функция добавление устройства в комнату.
-    pub fn attach_device(
-        &mut self,
-        device: &'a dyn DisplayableDevice,
-    ) -> Result<(), AttachmentError> {
-        let is_exist = |name: &str| -> bool { self.devices.contains_key(name) };
-        let device_name = device.name();
-
-        attachment_error(device_name, is_exist).map(|_| {
-            self.devices.insert(device_name, device);
-        })
     }
 }
 
