@@ -58,7 +58,7 @@ impl<'a> SmartHouse<'a> {
             result.push_str(&format!("{:-<20}\n", ""));
             result.push_str(&format!("Комната: {}\n", room.name()));
 
-            for device in room.devices.values() {
+            for device in room {
                 result.push_str(&format!("\t{}\n", device));
             }
         }
