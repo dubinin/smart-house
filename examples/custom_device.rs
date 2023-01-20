@@ -10,6 +10,14 @@ impl Device for MyDevice {
         "Пользовательское"
     }
 
+    fn on(&mut self) -> bool {
+        true
+    }
+
+    fn off(&mut self) -> bool {
+        false
+    }
+
     fn power(&self) -> u16 {
         16
     }

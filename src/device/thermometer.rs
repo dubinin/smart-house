@@ -49,6 +49,16 @@ impl<'a> Device for SmartThermometer<'a> {
         self.name
     }
 
+    /// Термометр всегда вкключен.
+    fn on(&mut self) -> bool {
+        true
+    }
+
+    /// Термометр нельзя выключить.
+    fn off(&mut self) -> bool {
+        false
+    }
+
     /// Константное значение потребляемой мощности.
     fn power(&self) -> u16 {
         20

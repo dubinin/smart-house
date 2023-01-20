@@ -1,15 +1,18 @@
 //! Модуль для реализация умной розетки.
 
 use std::collections::{hash_map::Values, HashMap};
+use std::io::{Read, Write};
 
 use crate::error::{attachment_error, AttachmentError};
 
-use super::{Device, DisplayableDevice};
+use super::{network::DeviceTcpServer, Device, DisplayableDevice};
 
 /// Структура умной розетки, которая хранит ссылки на устройства подключенные к ней.
 pub struct SmartSocket<'a> {
     name: &'a str,
+    is_on: bool,
     devices: HashMap<String, &'a dyn Device>,
+    listener: Option<DeviceTcpServer>,
 }
 
 pub struct SmartSocketIterator<'a> {
@@ -44,10 +47,49 @@ impl<'a> Device for SmartSocket<'a> {
         self.name
     }
 
+    /// Включение розетки.
+    fn on(&mut self) -> bool {
+        if !self.is_on {
+            self.is_on = true;
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Выключение розетки.
+    fn off(&mut self) -> bool {
+        if self.is_on {
+            self.is_on = false;
+            true
+        } else {
+            false
+        }
+    }
+
     /// Значение потребляемой мощности. Есть сумма потребляемых мощностей подключенных
     /// к розетки других устройств. У самой розетки потребляемая мощность равно 0.
     fn power(&self) -> u16 {
         self.into_iter().map(|device| device.power()).sum()
+    }
+
+    fn start_server(&self) {
+        if let Some(ref listener) = self.listener {
+            for mut stream in listener.incoming() {
+                println!("Client with ip {} connected", stream.peer_addr().unwrap());
+
+                let mut buf = [0; 1];
+                if stream.read_exact(&mut buf).is_ok() {
+                    let response = match buf[0] {
+                        0 => String::from("Power off"),
+                        1 => String::from("Power on"),
+                        2 => self.to_string(),
+                        _ => String::from("Wrong command!"),
+                    };
+                    stream.write_all(response.as_bytes()).unwrap();
+                }
+            }
+        }
     }
 }
 
@@ -68,11 +110,27 @@ impl<'a> DisplayableDevice for SmartSocket<'a> {}
 
 /// Функциональность специфичная для умной розетки.
 impl<'a> SmartSocket<'a> {
-    /// Конструктор розетки с передачей ее названия.
+    /// Конструктор розетки с передачей ее названия, без TCP сервера.
     pub fn with_name(name: &'a str) -> Self {
         Self {
             name,
+            is_on: false,
             devices: Default::default(),
+            listener: None,
+        }
+    }
+
+    /// Конструктор розетки с передачей названия и регистрацией TCP сервера по переданному адресу.
+    pub fn with_name_server(name: &'a str, address: &'a str) -> Self {
+        let listener = match DeviceTcpServer::bind(address) {
+            Ok(server) => Some(server),
+            Err(_) => None,
+        };
+        Self {
+            name,
+            is_on: false,
+            devices: Default::default(),
+            listener,
         }
     }
 
