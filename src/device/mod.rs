@@ -7,6 +7,8 @@ mod network;
 mod socket;
 mod thermometer;
 
+pub use network::DeviceTcpClient;
+pub use network::DeviceTcpServer;
 pub use socket::SmartSocket;
 pub use thermometer::SmartThermometer;
 
@@ -25,7 +27,9 @@ pub trait Device {
     fn power(&self) -> u16;
 
     /// Запускает сервер, если устройство реализует TCP сервер.
-    fn start_server(&self) {}
+    fn start_server(&mut self, _server: DeviceTcpServer) {
+        // Реализация запуска сервера по умолчанию ничего не делает.
+    }
 }
 
 pub trait DisplayableDevice: Device + std::fmt::Display {}

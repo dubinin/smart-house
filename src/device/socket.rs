@@ -12,7 +12,6 @@ pub struct SmartSocket<'a> {
     name: &'a str,
     is_on: bool,
     devices: HashMap<String, &'a dyn Device>,
-    listener: Option<DeviceTcpServer>,
 }
 
 pub struct SmartSocketIterator<'a> {
@@ -73,21 +72,34 @@ impl<'a> Device for SmartSocket<'a> {
         self.into_iter().map(|device| device.power()).sum()
     }
 
-    fn start_server(&self) {
-        if let Some(ref listener) = self.listener {
-            for mut stream in listener.incoming() {
-                println!("Client with ip {} connected", stream.peer_addr().unwrap());
+    fn start_server(&mut self, server: DeviceTcpServer) {
+        for mut stream in server.incoming() {
+            println!(
+                "Recieve command from client with ip: {}.",
+                stream.peer_addr().unwrap()
+            );
 
-                let mut buf = [0; 1];
-                if stream.read_exact(&mut buf).is_ok() {
-                    let response = match buf[0] {
-                        0 => String::from("Power off"),
-                        1 => String::from("Power on"),
-                        2 => self.to_string(),
-                        _ => String::from("Wrong command!"),
-                    };
-                    stream.write_all(response.as_bytes()).unwrap();
-                }
+            let mut buf = [0; 1];
+            if stream.read_exact(&mut buf).is_ok() {
+                let response = match buf[0] {
+                    0 => {
+                        if self.off() {
+                            String::from("Power off.")
+                        } else {
+                            String::from("Already off.")
+                        }
+                    }
+                    1 => {
+                        if self.on() {
+                            String::from("Power on.")
+                        } else {
+                            String::from("Already on.")
+                        }
+                    }
+                    2 => self.to_string(),
+                    _ => String::from("Wrong command!"),
+                };
+                stream.write_all(response.as_bytes()).unwrap();
             }
         }
     }
@@ -96,10 +108,15 @@ impl<'a> Device for SmartSocket<'a> {
 /// Трейт Display используется для составления отчета по розетки.
 impl<'a> std::fmt::Display for SmartSocket<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let status = match self.is_on {
+            true => "включена",
+            false => "выключена",
+        };
         write!(
             f,
-            "Умная розетка: {}, подключено устройств: {}, потребляемая мощность: {}",
+            "Умная розетка: {} - {}, подключено устройств: {}, потребляемая мощность: {}",
             self.name(),
+            status,
             self.devices.len(),
             self.power()
         )
@@ -116,21 +133,6 @@ impl<'a> SmartSocket<'a> {
             name,
             is_on: false,
             devices: Default::default(),
-            listener: None,
-        }
-    }
-
-    /// Конструктор розетки с передачей названия и регистрацией TCP сервера по переданному адресу.
-    pub fn with_name_server(name: &'a str, address: &'a str) -> Self {
-        let listener = match DeviceTcpServer::bind(address) {
-            Ok(server) => Some(server),
-            Err(_) => None,
-        };
-        Self {
-            name,
-            is_on: false,
-            devices: Default::default(),
-            listener,
         }
     }
 
