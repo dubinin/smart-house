@@ -1,13 +1,13 @@
 //! Модуль для реализация умного термометра.
 
 use super::{Device, DisplayableDevice};
-use rand::Rng;
 
 /// Структура умного термометра.
 /// Данные по температуре не хранятся в самой структуре. А получаются по факту вызова
 /// соответсвующего метода.
 pub struct SmartThermometer<'a> {
     name: &'a str,
+    temperature: f32,
 }
 
 /// Шкалы температур для котрых можно получить данные от умного термометра.
@@ -86,13 +86,18 @@ impl<'a> DisplayableDevice for SmartThermometer<'a> {}
 impl<'a> SmartThermometer<'a> {
     /// Конструктор термометра с передачей ее названия.
     pub fn with_name(name: &'a str) -> Self {
-        Self { name }
+        Self {
+            name,
+            temperature: 0.0,
+        }
     }
 
     /// Функция получения значения температуры в зависимости от переданной температурной шкалы.
     pub fn temperature(&self, scale: &TemperatureScale) -> f32 {
-        let mut rng = rand::thread_rng();
-        let raw_temperature = rng.gen_range(-20.0..=40.0);
-        scale.transform(raw_temperature)
+        scale.transform(self.temperature)
+    }
+
+    pub fn set_temperature(&mut self, value: f32) {
+        self.temperature = value;
     }
 }
