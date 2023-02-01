@@ -1,4 +1,8 @@
-use std::{net::UdpSocket, thread, sync::{Arc, RwLock}};
+use std::{
+    net::UdpSocket,
+    sync::{Arc, RwLock},
+    thread,
+};
 
 fn main() -> std::io::Result<()> {
     let socket = UdpSocket::bind("0.0.0.0:3000").unwrap();
@@ -32,7 +36,6 @@ fn main() -> std::io::Result<()> {
         let mut buf = [0; 1];
         let (size, sender) = socket.recv_from(&mut buf)?;
         println!("Received {} bytes from {}.", size, sender);
-
 
         // Отправим текущее значение температуры.
         socket.send_to(value.read().unwrap().to_be_bytes().as_slice(), sender)?;
