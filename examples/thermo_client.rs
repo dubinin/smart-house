@@ -19,7 +19,7 @@ fn main() -> std::io::Result<()> {
 
         socket.recv(&mut buf)?;
 
-        thermometer.set_temperature(f32::from_be_bytes(buf));
+        thermometer.set_temperature(i32::from_be_bytes(buf) as f32);
         println!("Report from thermometer: {}", thermometer);
     }
 }
