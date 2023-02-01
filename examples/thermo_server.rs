@@ -1,9 +1,9 @@
-use std::{net::UdpSocket, thread, sync::{Arc, atomic::{AtomicI32, Ordering}}};
+use std::{net::UdpSocket, thread, sync::{Arc, RwLock}};
 
 fn main() -> std::io::Result<()> {
     let socket = UdpSocket::bind("0.0.0.0:3000").unwrap();
 
-    let value = Arc::new(AtomicI32::new(0));
+    let value = Arc::new(RwLock::<f32>::new(0.0));
 
     let value_for_write = Arc::clone(&value);
 
@@ -14,11 +14,11 @@ fn main() -> std::io::Result<()> {
             user_input.clear();
             std::io::stdin().read_line(&mut user_input).unwrap();
 
-            match user_input.trim().parse::<i32>() {
+            match user_input.trim().parse::<f32>() {
                 Ok(input) => {
                     // Изменить значение для value.
                     println!("Change value to: {}", input);
-                    value_for_write.store(input, Ordering::SeqCst);
+                    *value_for_write.write().unwrap() = input;
                 }
                 Err(err) => {
                     println!("Value parse error: {}", err);
@@ -35,6 +35,6 @@ fn main() -> std::io::Result<()> {
 
 
         // Отправим текущее значение температуры.
-        socket.send_to(value.load(Ordering::SeqCst).to_be_bytes().as_slice(), sender)?;
+        socket.send_to(value.read().unwrap().to_be_bytes().as_slice(), sender)?;
     }
 }
