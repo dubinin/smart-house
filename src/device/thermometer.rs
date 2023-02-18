@@ -38,7 +38,7 @@ impl std::fmt::Display for TemperatureScale {
             Self::Fahrenheit => "°F",
             Self::Kelvin => "K",
         };
-        write!(f, "{}", description)
+        write!(f, "{description}")
     }
 }
 

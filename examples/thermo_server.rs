@@ -21,11 +21,11 @@ fn main() -> std::io::Result<()> {
             match user_input.trim().parse::<f32>() {
                 Ok(input) => {
                     // Изменить значение для value.
-                    println!("Change value to: {}", input);
+                    println!("Change value to: {input}");
                     *value_for_write.write().unwrap() = input;
                 }
                 Err(err) => {
-                    println!("Value parse error: {}", err);
+                    println!("Value parse error: {err}");
                     continue;
                 }
             }
@@ -35,7 +35,7 @@ fn main() -> std::io::Result<()> {
     loop {
         let mut buf = [0; 1];
         let (size, sender) = socket.recv_from(&mut buf)?;
-        println!("Received {} bytes from {}.", size, sender);
+        println!("Received {size} bytes from {sender}.");
 
         // Отправим текущее значение температуры.
         socket.send_to(value.read().unwrap().to_be_bytes().as_slice(), sender)?;

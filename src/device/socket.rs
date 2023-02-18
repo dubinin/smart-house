@@ -33,7 +33,7 @@ impl std::fmt::Display for SocketError {
                 "Нельзя подключать в розетку устройство которое не потребляет энергию!",
             ),
         };
-        write!(f, "{}", message)
+        write!(f, "{message}")
     }
 }
 

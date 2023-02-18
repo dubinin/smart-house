@@ -29,7 +29,7 @@ impl std::fmt::Display for AttachmentError {
             Self::ShortName => "Переданное имя слишком короткое!",
             Self::LongName => "Переданное имя слишком длинное!",
         };
-        write!(f, "{}", message)
+        write!(f, "{message}")
     }
 }
 

@@ -25,11 +25,11 @@ For exit type: exit."
         match command.parse::<u8>() {
             Ok(command) => {
                 if let Some(response) = client.send_command(command) {
-                    println!("Execute command {}: {}", command, response);
+                    println!("Execute command {command}: {response}");
                 }
             }
             Err(err) => {
-                println!("Command parse error: {}", err);
+                println!("Command parse error: {err}");
                 continue;
             }
         }
