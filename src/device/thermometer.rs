@@ -63,6 +63,10 @@ impl<'a> Device for SmartThermometer<'a> {
     fn power(&self) -> u16 {
         20
     }
+
+    fn execute(&mut self, _command: u8) -> String {
+        String::from("Thermometer does not implement any command!")
+    }
 }
 
 /// Трейт Display используется для составления отчета для термометра.

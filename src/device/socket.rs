@@ -1,11 +1,10 @@
 //! Модуль для реализация умной розетки.
 
 use std::collections::{hash_map::Values, HashMap};
-use std::io::{Read, Write};
 
 use crate::error::{attachment_error, AttachmentError};
 
-use super::{network::DeviceTcpServer, Device, DisplayableDevice};
+use super::{Device, DisplayableDevice};
 
 /// Структура умной розетки, которая хранит ссылки на устройства подключенные к ней.
 pub struct SmartSocket<'a> {
@@ -72,35 +71,24 @@ impl<'a> Device for SmartSocket<'a> {
         self.into_iter().map(|device| device.power()).sum()
     }
 
-    fn start_server(&mut self, server: DeviceTcpServer) {
-        for mut stream in server.incoming() {
-            println!(
-                "Recieve command from client with ip: {}.",
-                stream.peer_addr().unwrap()
-            );
-
-            let mut buf = [0; 1];
-            if stream.read_exact(&mut buf).is_ok() {
-                let response = match buf[0] {
-                    0 => {
-                        if self.off() {
-                            String::from("Power off.")
-                        } else {
-                            String::from("Already off.")
-                        }
-                    }
-                    1 => {
-                        if self.on() {
-                            String::from("Power on.")
-                        } else {
-                            String::from("Already on.")
-                        }
-                    }
-                    2 => self.to_string(),
-                    _ => String::from("Wrong command!"),
-                };
-                stream.write_all(response.as_bytes()).unwrap();
+    fn execute(&mut self, command: u8) -> String {
+        match command {
+            0 => {
+                if self.off() {
+                    String::from("Power off.")
+                } else {
+                    String::from("Already off.")
+                }
             }
+            1 => {
+                if self.on() {
+                    String::from("Power on.")
+                } else {
+                    String::from("Already on.")
+                }
+            }
+            2 => self.to_string(),
+            _ => String::from("Wrong command!"),
         }
     }
 }

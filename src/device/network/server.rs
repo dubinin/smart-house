@@ -1,12 +1,15 @@
 //! Серверная часть реализации сетевого взаимодействия с умными устройствами.
 
-use std::net::{TcpListener, TcpStream, ToSocketAddrs};
+use crate::device::Device;
+use std::io::{Read, Write};
+use std::net::{TcpListener, ToSocketAddrs};
 
-pub type BindResult = Result<DeviceTcpServer, BindError>;
+pub type BindResult<T> = Result<DeviceTcpServer<T>, BindError>;
 
 /// Реализация TCP сервера для удаленного взаимодействия с умным устройством.
-pub struct DeviceTcpServer {
+pub struct DeviceTcpServer<T: Device> {
     listener: TcpListener,
+    device: T,
 }
 
 #[derive(Debug)]
@@ -14,18 +17,29 @@ pub enum BindError {
     Io(std::io::Error),
 }
 
-impl DeviceTcpServer {
-    pub fn bind<Addrs>(addrs: Addrs) -> BindResult
+impl<T: Device> DeviceTcpServer<T> {
+    pub fn bind<Addrs>(addrs: Addrs, device: T) -> BindResult<T>
     where
         Addrs: ToSocketAddrs,
     {
         match TcpListener::bind(addrs) {
-            Ok(listener) => Ok(DeviceTcpServer { listener }),
+            Ok(listener) => Ok(DeviceTcpServer { listener, device }),
             Err(io) => Err(BindError::Io(io)),
         }
     }
 
-    pub fn incoming(&self) -> impl Iterator<Item = TcpStream> + '_ {
-        self.listener.incoming().filter_map(|con| con.ok())
+    pub fn start(&mut self) {
+        for mut stream in self.listener.incoming().filter_map(|con| con.ok()) {
+            println!(
+                "Recieve command from client with ip: {}.",
+                stream.peer_addr().unwrap()
+            );
+
+            let mut buf = [0; 1];
+            if stream.read_exact(&mut buf).is_ok() {
+                let response = &self.device.execute(buf[0]);
+                stream.write_all(response.as_bytes()).unwrap();
+            }
+        }
     }
 }

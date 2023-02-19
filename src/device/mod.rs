@@ -26,10 +26,8 @@ pub trait Device {
     /// Возвращает потребляемое количество энергии устройством.
     fn power(&self) -> u16;
 
-    /// Запускает сервер, если устройство реализует TCP сервер.
-    fn start_server(&mut self, _server: DeviceTcpServer) {
-        // Реализация запуска сервера по умолчанию ничего не делает.
-    }
+    /// Выполнить произвольную команду и вернуть ответ.
+    fn execute(&mut self, command: u8) -> String;
 }
 
 pub trait DisplayableDevice: Device + std::fmt::Display {}

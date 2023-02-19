@@ -21,6 +21,10 @@ impl Device for MyDevice {
     fn power(&self) -> u16 {
         16
     }
+
+    fn execute(&mut self, _command: u8) -> String {
+        String::new()
+    }
 }
 
 impl std::fmt::Display for MyDevice {
