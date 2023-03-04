@@ -3,6 +3,7 @@
 use crate::device::Device;
 use std::io::{Read, Write};
 use std::net::{TcpListener, ToSocketAddrs};
+use thiserror::Error;
 
 pub type BindResult<T> = Result<DeviceTcpServer<T>, BindError>;
 
@@ -12,9 +13,10 @@ pub struct DeviceTcpServer<T: Device> {
     device: T,
 }
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum BindError {
-    Io(std::io::Error),
+    #[error("IO Error.")]
+    Io(#[from] std::io::Error),
 }
 
 impl<T: Device> DeviceTcpServer<T> {

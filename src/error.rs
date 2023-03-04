@@ -1,10 +1,14 @@
 //! Модуль содержащий ошибки возникающие при работе библиотеки умный дом.
+use thiserror::Error;
 
 /// Ошибки прикрепления элемента к различным сущностям.
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum AttachmentError {
+    #[error("Запись с таким именем уже была добавлена!")]
     AlreadyExist,
+    #[error("Переданное имя слишком короткое!")]
     ShortName,
+    #[error("Переданное имя слишком длинное!")]
     LongName,
 }
 
@@ -21,16 +25,3 @@ where
         _ => Ok(()),
     }
 }
-
-impl std::fmt::Display for AttachmentError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let message = match self {
-            Self::AlreadyExist => "Запись с таким именем уже была добавлена!",
-            Self::ShortName => "Переданное имя слишком короткое!",
-            Self::LongName => "Переданное имя слишком длинное!",
-        };
-        write!(f, "{message}")
-    }
-}
-
-impl std::error::Error for AttachmentError {}
